@@ -167,7 +167,6 @@ const _objd SDO7000[] =
   {0x06, DTYPE_BOOLEAN, 1, ATYPE_RO | ATYPE_RXPDO, acName7000_06, 0, &Obj.Counters.Red},
   {0x07, DTYPE_BOOLEAN, 1, ATYPE_RO | ATYPE_RXPDO, acName7000_07, 0, &Obj.Counters.Green},
   {0x08, DTYPE_BOOLEAN, 1, ATYPE_RO | ATYPE_RXPDO, acName7000_08, 0, &Obj.Counters.Blue},
-  //{0x06, DTYPE_UNSIGNED8, 3, ATYPE_RO | ATYPE_RXPDO, acName7000_06, 0, NULL},
   {0x09, DTYPE_UNSIGNED8, 8, ATYPE_RO | ATYPE_RXPDO, acName7000_09, 0, &Obj.Counters.Sequence_Number},
 };
 const _objd SDO8000[] =

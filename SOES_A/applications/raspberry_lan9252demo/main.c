@@ -5,16 +5,18 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <time.h>
-
 #include <stdlib.h>
+
+// C言語のDOBOT APIライブラリ
 #include "DobotType.h"
 #include "DobotDll.h"
 
 #define MAX_Seq 1000
 
-/* Application variables */
+// ホストコントローラのアプリケーションオブジェクト
 _Objects    Obj;
 
+// ロボットアーム用の各種変数
 uint8_t SeqTable[MAX_Seq];
 uint8_t current_index = 1;
 uint8_t local_index;
@@ -177,54 +179,90 @@ void easy_system()
                     }
                 }
             }
+            // 次に来る物体が青の場合
             if(SeqTable[local_index + 1] == 3)
             {
                 // 物体が来るまで，センサーBがずっと検知し続ける
                 if (value == false) GetInfraredSensor(infraredPort, &value);
-                else if (Obj.States.Homing == false)    // ホーミング中には吸着動作をしない
+                // ホーミング中には物体を拾う動作をしない
+                // 物を検知したら，処理する
+                else if (Obj.States.Homing == false)
                 {
-                    // カメラの下に通らずまたは手などを検知した際にカウントさせないようにする
+                    // カメラの下に通らず途中でコンベアに置く時，または手などを検知した時はカウントさせない
                     if (local_index < Obj.Counters.Sequence_Number) local_index++;
+
                     printf("センサーBが検知した物体の個数: %d\n", local_index);
                     printf("%d個目に青色物体を検知しました\n",SeqTable[local_index]);
-                    blue_local = true;                  // フラグをtrueにして，コンベアを停止
+                    
+                    // 青い物体が検知されたフラグをtrueにして，MASTERがコンベアを停止する制御データを送る
+                    blue_local = true;
+
+                    // 物体を拾う動作のため変数設定
                     // アームの速度と加速度:vx,vy,vz,vr,ax,ay,az,ar
                     PTPJointParams ptpJointParams={{200, 200, 200, 200}, {200, 200, 200, 200}};
                     // 速度比率と加速度比率
                     PTPCommonParams ptpCommonParams={100, 100};
-                    // 移動先の位置
+                    // 物体を拾う時の移動先の位置
+                    // 初期位置
                     PTPCmd ptpCmd1={PTPMOVLXYZMode, 200, 0, 70, 0};
+                    // 物体の真上の位置
                     PTPCmd ptpCmd2={PTPMOVLXYZMode, 232.316, 203.293, 50, 41.188};
+                    // 物体を拾う時の位置
                     PTPCmd ptpCmd3={PTPMOVLXYZMode, 232.316, 203.293, 12.293, 41.188};
+                    // 物体を拾い，ロボットアームAが上に上がる位置
                     PTPCmd ptpCmd4={PTPMOVLXYZMode, 232.316, 203.293, 50, 41.188};
+                    // 物体を落とす位置
                     PTPCmd ptpCmd5={PTPMOVLXYZMode, 179.063, -67.946, 57.675, -20.779};
+                    // 初期位置
                     PTPCmd ptpCmd6={PTPMOVLXYZMode, 200, 0, 70, 0};
 
+                    // 物体を拾う動作の開始時間を計測する
                     start_time = time(NULL);
 
+                    // 動作を開始する
                     SetQueuedCmdStartExec();
+                    // ロボットアームAに設定した変数を反映させる
                     SetPTPJointParams(&ptpJointParams, isQueued, &queuedCmdIndex);
                     SetPTPCommonParams(&ptpCommonParams, isQueued, &queuedCmdIndex);
+                    // ロボットアームAを指定した位置に動かせる
+                    // ロボットアームAを初期位置に移動させる
                     SetPTPCmd(&ptpCmd1, isQueued, &queuedCmdIndex);
+                    // エアポンプを起動させる
                     SetEndEffectorSuctionCup(1, 1, isQueued, &queuedCmdIndex);
+                    // ロボットアームAを物体の真上に移動させる
                     SetPTPCmd(&ptpCmd2, isQueued, &queuedCmdIndex);
+                    // ロボットアームAを物体の位置に移動させ，物体を拾わせる
                     SetPTPCmd(&ptpCmd3, isQueued, &queuedCmdIndex);
+                    // ロボットアームAを上に上げる
                     SetPTPCmd(&ptpCmd4, isQueued, &queuedCmdIndex);
+                    // ロボットアームAを物体を落とす位置に移動させる
                     SetPTPCmd(&ptpCmd5, isQueued, &queuedCmdIndex);
+                    // エアポンプを停止し，物体を落とす
                     SetEndEffectorSuctionCup(0, 0, isQueued, &queuedCmdIndex);
+                    // ロボットアームAを初期位置に移動させる
                     SetPTPCmd(&ptpCmd6, isQueued, &queuedCmdIndex);
 
+                    // 上記の物体を拾う動作をロボットアームAのキューに溜まって，順番ずつ実行する
                     while (executedCmdIndex < queuedCmdIndex)
                     {
                         GetQueuedCmdCurrentIndex(&executedCmdIndex);
+                        // ロボットアームAがコマンドを実行する際の位置を取得する
                         GetPose(&pose);
                     }
+                    // キューのコマンドを実行終わると，停止する
                     SetQueuedCmdStopExec();
 
+                    // 物体を拾う動作の終了時間を計測する
                     end_time = time(NULL);
-                    blue_local = false;         // 吸着が終わったら，コンベアを起動する
+
+                    // 拾う動作が終わったら，コンベアを停止する
+                    blue_local = false;
+
+                    // 物体を拾う動作が掛かった時間を出力する
                     printf("移動時間:%lf\n", difftime(end_time, start_time));
-                    // 吸着できないまたは取り扱わない物体がセンサーの検知範囲から離れるまで待つ
+
+                    // 物体実際の位置がptpCmd3変数で設定した物体を拾う位置とずれて，拾えない時，
+                    // センサAは物体が検知範囲から離れるまで待つ
                     while(1)
                     {
                         GetInfraredSensor(infraredPort, &value);

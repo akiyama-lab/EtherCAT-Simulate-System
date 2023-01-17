@@ -74,7 +74,6 @@ static const char acName7000_03[] = "Homing";
 static const char acName7000_04[] = "Red";
 static const char acName7000_05[] = "Green";
 static const char acName7000_06[] = "Blue";
-//static const char acName7000_07[] = "Padding";
 static const char acName7000_08[] = "Sequence_number";
 
 static const char acName8000[] = "Parameters";
