@@ -16,15 +16,18 @@ Raspberry Piはコンパイル済みのDLLを利用して，Raspberry PiとUSB�
 [Dobot Magician C言語プログラミングガイド](https://www.physical-computing.jp/product/2136 "dobot_c")ではDOBOT MagicianをC言語で動かすサンプルプログラムとライブラリを提供している．
 EtherCAT-Simulate-Systemは本で提供したライブラリを使用した．
 
-### 構成リスト
+### 各EtherCATスレーブ構成リスト
 - SLAVE A
+  - SLAVE AのESIファイルはslave_A.xmlである．
   - SLAVE AのPDO AssignmentやPDO Mappingなどのオブジェクト情報はSOES_A/applications/raspberry_lan9252demo/[slave_objectlist.c](https://github.com/akiyama-lab/EtherCAT-Simulate-System/blob/main/SOES_A/applications/raspberry_lan9252demo/slave_objectlist.c "a")にある．
   - ロボットアームAを制御するアプリケーションはSOES_A/applications/raspberry_lan9252demo/[main.c](https://github.com/akiyama-lab/EtherCAT-Simulate-System/blob/main/SOES_A/applications/raspberry_lan9252demo/main.c "a")にある．
 - SLAVE B
+  - SLAVE BのESIファイルはslave_B.xmlである．
   - SLAVE BのPDO AssignmentやPDO Mappingなどのオブジェクト情報はSOES_B/applications/raspberry_lan9252demo/[slave_objectlist.c](https://github.com/akiyama-lab/EtherCAT-Simulate-System/blob/main/SOES_B/applications/raspberry_lan9252demo/slave_objectlist.c "b")にある．
   - ロボットアームBとコンベアを制御するアプリケーションはSOES_B/applications/raspberry_lan9252demo/[main.c](https://github.com/akiyama-lab/EtherCAT-Simulate-System/blob/main/SOES_B/applications/raspberry_lan9252demo/main.c "b")にある．
 - SLAVE C
-    [](色識別pythonスクリプトはSOES_C/build/applications/raspberry_lan9252demo/colorDetect.pyである．)
+  - SLAVE CのESIファイルはslave_C.xmlである．
+  - 色識別pythonスクリプトはcolorDetect.pyである．
   - SLAVE CのPDO AssignmentやPDO Mappingなどのオブジェクト情報はSOES_C/applications/raspberry_lan9252demo/[slave_objectlist.c](https://github.com/akiyama-lab/EtherCAT-Simulate-System/blob/main/SOES_C/applications/raspberry_lan9252demo/slave_objectlist.c "c")にある．
   - 識別した結果を処理するアプリケーションはアプリケーションはSOES_C/applications/raspberry_lan9252demo/[main.c](https://github.com/akiyama-lab/EtherCAT-Simulate-System/blob/main/SOES_C/applications/raspberry_lan9252demo/main.c "c")にある．
 
