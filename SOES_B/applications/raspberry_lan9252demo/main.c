@@ -42,7 +42,7 @@ void cb_get_inputs (void)
         {
             printf("connect error\n");
         }
-        // 変数の処理化
+        // 変数の初期化
         printf("接続開始\n");
         for(int i = 0; i <= current_index; i++)
         {
@@ -50,6 +50,11 @@ void cb_get_inputs (void)
         }
         current_index = 1;
         local_index = 0;
+        // ロボットアームB位置の初期化
+        pose.x = 0;
+        pose.y = 0;
+        pose.z = 0;
+        pose.r = 0;
         // センサBの起動
         SetInfraredSensor(1, infraredPort, 1);
         value = false;
@@ -122,11 +127,6 @@ void cb_get_inputs (void)
         printf("Disconnect Dobot, Bye!\n");
         // ロボットアームBとの切断
         DisconnectDobot();
-        // ロボットアームB位置の初期化
-        pose.x = 0;
-        pose.y = 0;
-        pose.z = 0;
-        pose.r = 0;
         // SLAVE Bのシステム状態をFalseにする
         Obj.States.System = 0;
     }
