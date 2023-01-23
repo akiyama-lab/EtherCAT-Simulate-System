@@ -43,7 +43,7 @@ void cb_get_inputs (void)
             printf("connect error\n");
         }
         printf("接続開始\n");
-        // 変数の処理化
+        // 変数の初期化
         blue_local = false;
         printf("Connection Start blue local: %d \n", blue_local);
         for(int i = 0; i <= current_index; i++)
@@ -52,6 +52,11 @@ void cb_get_inputs (void)
         }
         current_index = 1;
         local_index = 0;
+        // ロボットアームA位置の初期化
+        pose.x = 0;
+        pose.y = 0;
+        pose.z = 0;
+        pose.r = 0;
         // センサAの起動
         SetInfraredSensor(1, infraredPort, 1);
         value = false;
@@ -87,11 +92,6 @@ void cb_get_inputs (void)
         printf("Disconnect Dobot, Bye!\n");
         // ロボットアームAとの切断
         DisconnectDobot();
-        // ロボットアーム位置の初期化
-        pose.x = 0;
-        pose.y = 0;
-        pose.z = 0;
-        pose.r = 0;
         // SLAVE Aのシステム状態をFalseにする
         Obj.States.System = false;
     }
@@ -100,7 +100,7 @@ void cb_get_inputs (void)
 // 入力変数オブジェクトとマッピングしている変数を用いて，処理を行う
 void cb_set_outputs (void)
 {
-    // ロボットアーム位置と青い物体を検知した際のフラグの出力
+    // ロボットアームA位置と青い物体を検知した際のフラグの出力
     Obj.Positions.Position_X = pose.x;
     Obj.Positions.Position_Y = pose.y;
     Obj.Positions.Position_Z = pose.z;
@@ -182,7 +182,7 @@ void easy_system()
             // 次に来る物体が青の場合
             if(SeqTable[local_index + 1] == 3)
             {
-                // 物体が来るまで，センサーBがずっと検知し続ける
+                // 物体が来るまで，センサAがずっと検知し続ける
                 if (value == false) GetInfraredSensor(infraredPort, &value);
                 // ホーミング中には物体を拾う動作をしない
                 // 物を検知したら，処理する
@@ -191,7 +191,7 @@ void easy_system()
                     // カメラの下に通らず途中でコンベアに置く時，または手などを検知した時はカウントさせない
                     if (local_index < Obj.Counters.Sequence_Number) local_index++;
 
-                    printf("センサーBが検知した物体の個数: %d\n", local_index);
+                    printf("センサAが検知した物体の個数: %d\n", local_index);
                     printf("%d個目に青色物体を検知しました\n",SeqTable[local_index]);
                     
                     // 青い物体が検知されたフラグをtrueにして，MASTERがコンベアを停止する制御データを送る
@@ -255,7 +255,7 @@ void easy_system()
                     // 物体を拾う動作の終了時間を計測する
                     end_time = time(NULL);
 
-                    // 拾う動作が終わったら，コンベアを停止する
+                    // 拾う動作が終わったら，コンベアを起動する
                     blue_local = false;
 
                     // 物体を拾う動作が掛かった時間を出力する
@@ -282,7 +282,7 @@ int main (void)
 
     // EtherCATプロセスデータを処理するスレッド
     pthread_create(&thread1, NULL, (void *)main_run, NULL);
-    // ロボットアームが物体を拾う操作を処理するスレッド
+    // ロボットアームが物体を拾うなどの操作を処理するスレッド
     pthread_create(&thread2, NULL, (void *)easy_system, NULL);
 
     pthread_join(thread1, NULL);
