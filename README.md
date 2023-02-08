@@ -1,5 +1,6 @@
 # EtherCAT-Simulate-System
 EtherCAT-Simulate-SystemはオープンソースのEtherCATスレーブスタック[SOES](https://github.com/OpenEtherCATsociety/SOES "SOES")を編集して，EtherCATのプロセスデータ通信を用いて，DOBOT Magicianのロボットアームとコンベアを制御するシステムである．
+各SOESのライセンスはそれぞれSOESのフォルダのLICENSEファイルを確認してください．
 
 ## Overview
 
